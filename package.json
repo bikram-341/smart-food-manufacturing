@@ -1,0 +1,40 @@
+{
+  "name": "smart-food-manufacture",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/presentation/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/presentation/server.ts",
+    "build:client": "npm --prefix client run build",
+    "build:server": "tsc",
+    "build": "npm run build:client && npm run build:server",
+    "start": "node dist/presentation/server.js",
+    "start:dev": "tsx src/presentation/server.ts",
+    "test": "vitest run",
+    "seed": "tsx src/infrastructure/database/seeder.ts",
+    "benchmark": "tsx src/scripts/runBenchmark.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "better-sqlite3": "^13.2.0",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "pdfkit": "^0.21.0",
+    "xlsx": "^0.18.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "@types/pdfkit": "^0.17.7",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  }
+}
