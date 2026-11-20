@@ -1,10 +1,6 @@
 import Database, { Database as DatabaseType } from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export class DatabaseConnection {
   private static instance: DatabaseType | null = null;
@@ -29,10 +25,17 @@ export class DatabaseConnection {
   }
 
   private static initializeSchema(db: DatabaseType): void {
-    const schemaFile = path.resolve(__dirname, 'schema.sql');
-    if (fs.existsSync(schemaFile)) {
-      const sql = fs.readFileSync(schemaFile, 'utf-8');
-      db.exec(sql);
+    const candidates = [
+      path.resolve(process.cwd(), 'src/infrastructure/database/schema.sql'),
+      path.resolve(process.cwd(), 'dist/infrastructure/database/schema.sql'),
+      path.resolve(process.cwd(), 'schema.sql'),
+    ];
+    for (const schemaFile of candidates) {
+      if (fs.existsSync(schemaFile)) {
+        const sql = fs.readFileSync(schemaFile, 'utf-8');
+        db.exec(sql);
+        break;
+      }
     }
   }
 

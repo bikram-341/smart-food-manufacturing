@@ -29,6 +29,7 @@ import { seedMasterData } from '../../infrastructure/database/seeder.js';
 
 export function createApiRouter(): Router {
   const router = Router();
+  const getId = (req: Request): string => (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id);
 
   // Instantiate Repositories
   const itemRepo = new SqliteItemRepository();
@@ -127,7 +128,7 @@ export function createApiRouter(): Router {
 
   router.get('/orders/:id', async (req: Request, res: Response) => {
     try {
-      const order = await orderService.getOrderById(req.params.id);
+      const order = await orderService.getOrderById(getId(req));
       if (!order) return res.status(404).json({ error: 'Order not found' });
       res.json({
         ...order,
@@ -149,7 +150,7 @@ export function createApiRouter(): Router {
 
   router.get('/orders/:id/stock-check', async (req: Request, res: Response) => {
     try {
-      const stockCheck = await orderService.checkStockAvailability(req.params.id);
+      const stockCheck = await orderService.checkStockAvailability(getId(req));
       res.json(stockCheck);
     } catch (err: any) {
       res.status(400).json({ error: err.message });
@@ -159,7 +160,7 @@ export function createApiRouter(): Router {
   router.post('/orders/:id/approve', async (req: Request, res: Response) => {
     try {
       const { adminUserId, modifications } = req.body;
-      const order = await orderService.approveOrder(req.params.id, adminUserId ?? 'admin', modifications);
+      const order = await orderService.approveOrder(getId(req), adminUserId ?? 'admin', modifications);
       res.json(order);
     } catch (err: any) {
       res.status(400).json({ error: err.message });
@@ -169,7 +170,7 @@ export function createApiRouter(): Router {
   router.post('/orders/:id/reject', async (req: Request, res: Response) => {
     try {
       const { adminUserId, reason } = req.body;
-      const order = await orderService.rejectOrder(req.params.id, adminUserId ?? 'admin', reason ?? 'Rejected by admin');
+      const order = await orderService.rejectOrder(getId(req), adminUserId ?? 'admin', reason ?? 'Rejected by admin');
       res.json(order);
     } catch (err: any) {
       res.status(400).json({ error: err.message });
@@ -199,7 +200,7 @@ export function createApiRouter(): Router {
 
   router.get('/invoices/:id', async (req: Request, res: Response) => {
     try {
-      const inv = await billingService.getInvoiceById(req.params.id);
+      const inv = await billingService.getInvoiceById(getId(req));
       if (!inv) return res.status(404).json({ error: 'Invoice not found' });
       res.json({
         ...inv,
@@ -216,7 +217,7 @@ export function createApiRouter(): Router {
 
   router.get('/invoices/:id/pdf', async (req: Request, res: Response) => {
     try {
-      const inv = await billingService.getInvoiceById(req.params.id);
+      const inv = await billingService.getInvoiceById(getId(req));
       if (!inv) return res.status(404).json({ error: 'Invoice not found' });
       const pdfBuffer = await InvoicePdfGenerator.generateInvoicePdf(inv);
       res.setHeader('Content-Type', 'application/pdf');
@@ -241,7 +242,7 @@ export function createApiRouter(): Router {
     try {
       const { adminUserId, transportMode, vehicleNumber } = req.body;
       const invoice = await billingService.recordDispatch({
-        orderId: req.params.id,
+        orderId: getId(req),
         adminUserId: adminUserId ?? 'admin',
         transportMode,
         vehicleNumber,
@@ -255,7 +256,7 @@ export function createApiRouter(): Router {
   router.post('/invoices/:id/cancel', async (req: Request, res: Response) => {
     try {
       const { adminUserId, reason } = req.body;
-      const creditNote = await billingService.cancelInvoice(req.params.id, adminUserId ?? 'admin', reason);
+      const creditNote = await billingService.cancelInvoice(getId(req), adminUserId ?? 'admin', reason);
       res.json({ success: true, creditNote });
     } catch (err: any) {
       res.status(400).json({ error: err.message });
@@ -359,7 +360,7 @@ export function createApiRouter(): Router {
 
   router.get('/customers/:id/outstanding', async (req: Request, res: Response) => {
     try {
-      const summary = await paymentService.getCustomerOutstanding(req.params.id);
+      const summary = await paymentService.getCustomerOutstanding(getId(req));
       res.json({
         ...summary,
         totalInvoicedRupees: summary.totalInvoiced.getRupees(),

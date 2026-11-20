@@ -2,13 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 import { createApiRouter } from './controllers/ApiController.js';
 import { seedMasterData } from '../infrastructure/database/seeder.js';
 import { DatabaseConnection } from '../infrastructure/database/DatabaseConnection.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -23,7 +19,7 @@ app.use('/api', createApiRouter());
 const clientDistPath = path.resolve(process.cwd(), 'client', 'dist');
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
-  app.get('*', (_req, res) => {
+  app.get('/{*splat}', (_req, res) => {
     res.sendFile(path.join(clientDistPath, 'index.html'));
   });
 } else {
@@ -74,10 +70,12 @@ try {
   console.error('Error during startup database check:', e);
 }
 
-app.listen(PORT, () => {
+const HOST = process.env.HOST || '127.0.0.1';
+
+app.listen(PORT, HOST, () => {
   console.log(`================================================================`);
-  console.log(`🏭 Smart Food Manufacturer Server running on http://localhost:${PORT}`);
-  console.log(`📊 Benchmark Runner API ready at POST http://localhost:${PORT}/api/benchmark/run`);
+  console.log(`🏭 Smart Food Manufacturer Server running on http://${HOST}:${PORT}`);
+  console.log(`📊 Benchmark Runner API ready at POST http://${HOST}:${PORT}/api/benchmark/run`);
   console.log(`================================================================`);
 });
 
